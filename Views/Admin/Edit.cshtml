@@ -1,0 +1,154 @@
+﻿@model RegistrationFormProject.Models.UserMaster
+
+<div class="container py-5 d-flex justify-content-center">
+
+    <div class="card shadow-lg p-5 w-100">
+
+        <h2 class="text-center mb-4">
+            Edit User
+        </h2>
+
+        <form method="post">
+
+            <input type="hidden" asp-for="UserId" />
+
+            <div class="row">
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="form-label">
+                        Full Name
+                    </label>
+
+                    <input asp-for="FullName"
+                           class="form-control" />
+
+                </div>
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="form-label">
+                        User Name
+                    </label>
+
+                    <input asp-for="UserName"
+                           class="form-control" />
+
+                </div>
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="form-label">
+                        Email
+                    </label>
+
+                    <input asp-for="EmailID"
+                           class="form-control" />
+
+                </div>
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="form-label">
+                        Mobile Number
+                    </label>
+
+                    <input asp-for="MobileNo"
+                           class="form-control" />
+
+                </div>
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="form-label">
+                        DOB
+                    </label>
+
+                    <input type="date"
+                           asp-for="DOB"
+                           class="form-control" />
+
+                </div>
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="form-label">
+                        Role
+                    </label>
+
+                    <select asp-for="RoleId"
+                            class="form-select">
+
+                        <option value="1">Admin</option>
+
+                        <option value="2">User</option>
+
+                    </select>
+
+                </div>
+
+                <div class="col-12 mb-4">
+
+                    <label class="form-label d-block">
+                        Gender
+                    </label>
+
+                    <div class="form-check form-check-inline">
+
+                        <input type="radio"
+                               asp-for="Gender"
+                               value="Male"
+                               class="form-check-input" />
+
+                        <label class="form-check-label">
+                            Male
+                        </label>
+
+                    </div>
+
+                    <div class="form-check form-check-inline">
+
+                        <input type="radio"
+                               asp-for="Gender"
+                               value="Female"
+                               class="form-check-input" />
+
+                        <label class="form-check-label">
+                            Female
+                        </label>
+
+                    </div>
+
+                    <div class="form-check form-check-inline">
+
+                        <input type="radio"
+                               asp-for="Gender"
+                               value="Other"
+                               class="form-check-input" />
+
+                        <label class="form-check-label">
+                            Other
+                        </label>
+
+                    </div>
+
+                </div>
+
+                <div class="col-12 d-grid">
+
+                    <button type="submit"
+                            class="btn btn-primary">
+
+                        Update User
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>

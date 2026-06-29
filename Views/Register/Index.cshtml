@@ -1,0 +1,351 @@
+@model RegistrationFormProject.Models.UserMaster
+
+<div class="mouse-glow"></div>
+
+<div class="container py-4">
+
+    <div class="card registration-card mx-auto">
+
+        <div class="text-center mb-4">
+
+            <h1 class="fw-bold">
+                Create Account
+            </h1>
+
+            <p class="text-muted mb-0">
+                Fill in your details to get started
+            </p>
+
+        </div>
+
+        <div asp-validation-summary="All"></div>
+
+        <form method="post" enctype="multipart/form-data">
+
+            <div class="row g-2">
+
+                <div class="col-md-6">
+
+                    <label class="form-label">
+                        Full Name
+                    </label>
+
+                    <div class="input-group">
+
+                        <span class="input-group-text">
+                            👤
+                        </span>
+
+                        <input asp-for="FullName"
+                               class="form-control" />
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-6">
+
+                    <label class="form-label">
+                        User Name
+                    </label><span id="userError"
+                                  class="text-danger"></span>
+
+                    <div class="input-group">
+
+                        <span class="input-group-text">
+                             
+                        </span>
+
+                        <input asp-for="UserName"
+                               class="form-control" />
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-6">
+
+                    <label class="form-label">
+                        Password
+                    </label>
+
+                    <div class="input-group">
+
+                        <span class="input-group-text">
+                            🔒
+                        </span>
+
+                        <input asp-for="Password"
+                               type="password"
+                               class="form-control" />
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-6">
+
+                    <label class="form-label">
+                        Confirm Password
+                    </label>
+
+                    <div class="input-group">
+
+                        <span class="input-group-text">
+                            🔒
+                        </span>
+
+                        <input asp-for="ConfirmPassword"
+                               type="password"
+                               class="form-control" />
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-6">
+
+                    <label class="form-label">
+                        Email
+                    </label><span id="emailError"
+                                  class="text-danger"></span>
+
+                    <input asp-for="EmailID"
+                           class="form-control" />
+
+                </div>
+
+                <div class="col-md-6">
+
+                    <label class="form-label">
+                        Mobile Number
+                    </label><span id="mobileError"
+                                  class="text-danger"></span>
+
+                    <input asp-for="MobileNo"
+                           class="form-control" />
+
+                </div>
+
+                <div class="col-md-6">
+
+                    <label class="form-label">
+                        Date Of Birth
+                    </label>
+
+                    <input asp-for="DOB"
+                           type="date"
+                           class="form-control" />
+
+                </div>
+
+                <div class="col-md-6">
+
+                    <label class="form-label">
+                        Role
+                    </label>
+
+                    <select asp-for="RoleId"
+                            class="form-select">
+
+                        <option value="">
+                            Select Role
+                        </option>
+
+                        <option value="1">
+                            Admin
+                        </option>
+
+                        <option value="2">
+                            User
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div class="col-12">
+
+                    <label class="form-label">
+                        Gender
+                    </label>
+
+                    <div class="d-flex gap-3">
+
+                        <label class="gender-pill">
+                            <input type="radio"
+                                   asp-for="Gender"
+                                   value="Male" />
+                            Male
+                        </label>
+
+                        <label class="gender-pill">
+                            <input type="radio"
+                                   asp-for="Gender"
+                                   value="Female" />
+                            Female
+                        </label>
+
+                        <label class="gender-pill">
+                            <input type="radio"
+                                   asp-for="Gender"
+                                   value="Other" />
+                            Other
+                        </label>
+
+                    </div>
+
+                </div>
+
+                <!-- Mandatory Documents Upload -->
+                <div class="col-12 mt-4 border-top pt-4">
+                    <h5 class="mb-3 text-primary fw-bold">KYC Verification Documents (Mandatory)</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Aadhaar Card (PDF only, max 2MB) <span class="text-danger">*</span></label>
+                            <input type="file" name="AadhaarFile" class="form-control" accept="application/pdf" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">PAN Card (PDF only, max 2MB) <span class="text-danger">*</span></label>
+                            <input type="file" name="PanFile" class="form-control" accept="application/pdf" required />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Optional Documents Upload -->
+                <div class="col-12 mt-4 border-top pt-4 mb-3">
+                    <h5 class="mb-3 text-muted fw-bold">Optional KYC Documents (PDF only, max 2MB)</h5>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Passport (PDF)</label>
+                            <input type="file" name="PassportFile" class="form-control" accept="application/pdf" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Driving License (PDF)</label>
+                            <input type="file" name="DrivingLicenseFile" class="form-control" accept="application/pdf" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Voter ID (PDF)</label>
+                            <input type="file" name="VoterIdFile" class="form-control" accept="application/pdf" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Ration Card (PDF)</label>
+                            <input type="file" name="RationCardFile" class="form-control" accept="application/pdf" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Others (PDF)</label>
+                            <input type="file" name="OthersFile" class="form-control" accept="application/pdf" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 mb-3">
+
+                    <label class="form-label fw-semibold text-muted mb-2">
+                        Security Verification
+                    </label>
+
+                    <div class="captcha-container mb-3">
+
+                        <div class="captcha-image-wrapper">
+
+                            <img id="captchaImage"
+                                 src="/Captcha/GenerateCaptcha"
+                                 alt="CAPTCHA Image" />
+
+                        </div>
+
+                        <button type="button"
+                                class="btn btn-refresh-captcha"
+                                onclick="refreshCaptcha()">
+
+                            <i class="bi bi-arrow-clockwise"></i>
+
+                        </button>
+
+                    </div>
+
+                    <div class="input-group">
+
+                        <span class="input-group-text">
+                            🛡️
+                        </span>
+
+                        <input type="text"
+                               name="captchaInput"
+                               class="form-control"
+                               placeholder="Enter Security Code"
+                               required
+                               autocomplete="off" />
+
+                    </div>
+
+                </div>
+
+                <div class="col-12 mt-2">
+
+                    <button type="submit"
+                            class="btn btn-register w-100">
+
+                        Create Account
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+<script>
+
+document.addEventListener('mousemove', function(e){
+
+    const glow = document.querySelector('.mouse-glow');
+
+    glow.style.left = e.clientX + 'px';
+    glow.style.top = e.clientY + 'px';
+
+});
+
+function refreshCaptcha() {
+    const img = document.getElementById("captchaImage");
+    if (img) {
+        img.classList.add("loading");
+        img.src = "/Captcha/GenerateCaptcha?" + new Date().getTime();
+        img.onload = function() {
+            img.classList.remove("loading");
+        };
+    }
+    
+}
+
+</script>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $("#UserName").keyup(function () {
+                $.get("/Register/CheckUsername", { username: $(this).val() }, function (data) {
+                    $("#userError").text(data ? "" : "Username already exists");
+                });
+            });
+
+            $("#EmailID").keyup(function () {
+                $.get("/Register/CheckEmail", { email: $(this).val() }, function (data) {
+                    $("#emailError").text(data ? "" : "Email already exists");
+                });
+            });
+
+            $("#MobileNo").keyup(function () {
+                $.get("/Register/CheckMobile", { mobile: $(this).val() }, function (data) {
+                    $("#mobileError").text(data ? "" : "Mobile already exists");
+                });
+            });
+        });
+    </script>
+}

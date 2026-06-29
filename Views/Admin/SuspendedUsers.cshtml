@@ -1,0 +1,52 @@
+﻿@model List<RegistrationFormProject.Models.UserMaster>
+
+<h2 class="mb-4">
+    Suspended Users
+</h2>
+
+<table class="table table-bordered table-hover">
+
+    <thead>
+
+        <tr>
+            <th>Id</th>
+            <th>Name</th>
+            <th>Username</th>
+            <th>Failed Attempts</th>
+            <th>Action</th>
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        @foreach (var user in Model)
+        {
+            <tr>
+
+                <td>@user.UserId</td>
+
+                <td>@user.FullName</td>
+
+                <td>@user.UserName</td>
+
+                <td>@user.FailedLoginAttempts</td>
+
+                <td>
+
+                    <a asp-action="UnlockUser"
+                       asp-route-id="@user.UserId"
+                       class="btn btn-warning">
+
+                        Unlock
+
+                    </a>
+
+                </td>
+
+            </tr>
+        }
+
+    </tbody>
+
+</table>

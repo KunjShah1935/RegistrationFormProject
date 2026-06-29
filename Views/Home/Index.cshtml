@@ -1,0 +1,262 @@
+﻿
+
+<div class="dashboard-header mb-5">
+
+    <h1 class="dashboard-title">
+        Welcome back, @User.Identity?.Name 
+    </h1>
+
+    <p class="dashboard-subtitle">
+        Here's what's happening in your system today.
+    </p>
+
+</div>
+
+<div class="row g-4">
+
+    <div class="col-lg-4 col-md-6">
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                👥
+            </div>
+
+            <div>
+
+                <h6 class="stat-label">
+                    Total Users
+                </h6>
+
+                <h2 class="stat-value">
+                    @ViewBag.TotalUsers
+                </h2>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-lg-4 col-md-6">
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                🛡️
+            </div>
+
+            <div>
+
+                <h6 class="stat-label">
+                    Total Roles
+                </h6>
+
+                <h2 class="stat-value">
+                    @ViewBag.TotalRoles
+                </h2>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-lg-4 col-md-6">
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                📅
+            </div>
+
+            <div>
+
+                <h6 class="stat-label">
+                    Today's Date
+                </h6>
+
+                <h2 class="stat-value">
+                    @DateTime.Now.ToString("dd MMM yyyy")
+                </h2>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+@if (User.IsInRole("Admin"))
+{
+    <div class="row mt-5 g-4">
+
+        <div class="col-md-3">
+
+            <div class="card bg-success text-white shadow-lg border-0">
+
+                <div class="card-body text-center">
+
+                    <h6>Verified Documents</h6>
+
+                    <h2>@ViewBag.VerifiedDocuments</h2>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-3">
+
+            <div class="card bg-warning shadow-lg border-0">
+
+                <div class="card-body text-center">
+
+                    <h6>Pending Verification</h6>
+
+                    <h2>@ViewBag.PendingDocuments</h2>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-3">
+
+            <div class="card bg-primary text-white shadow-lg border-0">
+
+                <div class="card-body text-center">
+
+                    <h6>Total Documents</h6>
+
+                    <h2>@ViewBag.TotalDocuments</h2>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-3">
+
+            <div class="card bg-danger text-white shadow-lg border-0">
+
+                <div class="card-body text-center">
+
+                    <h6>Users Awaiting</h6>
+
+                    <h2>@ViewBag.UsersAwaitingVerification</h2>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="row mt-4">
+
+        <div class="col-12">
+
+            <div class="activity-card">
+
+                <h4 class="mb-3">
+                    📄 Document Verification Overview
+                </h4>
+
+                <p class="text-muted">
+
+                    Review, verify and manage user documents from the
+                    Document Verification module in the sidebar.
+
+                </p>
+
+                <a asp-controller="Admin"
+                   asp-action="DocumentVerification"
+                   class="btn btn-primary">
+
+                    Go To Document Verification
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+}
+else
+{
+    <div class="col-md-6 mt-4">
+
+        <div class="card shadow-lg border-0 verification-card">
+
+            <div class="card-body p-4">
+
+                <h4 class="fw-bold mb-3">
+                    📄 Document Verification
+                </h4>
+
+                <p>
+                    Aadhaar :
+                    @(ViewBag.AadhaarUploaded
+                        ? "✅ Uploaded"
+                        : "❌ Missing")
+                </p>
+
+                <p>
+                    PAN :
+                    @(ViewBag.PanUploaded
+                        ? "✅ Uploaded"
+                        : "❌ Missing")
+                </p>
+
+                @if (ViewBag.IsVerified)
+                {
+                    <div class="alert alert-success">
+
+                        ✅ Documents Verified
+
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-warning">
+
+                        ⏳ Documents Pending Verification
+
+                    </div>
+                }
+
+                <a asp-controller="Document"
+                   asp-action="Index"
+                   class="btn btn-primary">
+
+                    Manage Documents
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+}
+
+@if (TempData["Success"] != null)
+{
+    <script>
+
+        Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: '@TempData["Success"]',
+            timer: 2000,
+            showConfirmButton: false
+        });
+
+    </script>
+}

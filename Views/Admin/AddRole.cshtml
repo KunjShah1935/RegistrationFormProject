@@ -1,0 +1,31 @@
+﻿@model RoleMaster
+
+<div class="card p-4 shadow">
+
+    <h3 class="mb-4">
+        Add Role
+    </h3>
+
+    <form method="post">
+
+        <div class="mb-3">
+
+            <label class="form-label">
+                Role Name
+            </label>
+
+            <input asp-for="RoleName"
+                   class="form-control" />
+
+        </div>
+
+        <button type="submit"
+                class="btn btn-primary">
+
+            Add Role
+
+        </button>
+
+    </form>
+
+</div>

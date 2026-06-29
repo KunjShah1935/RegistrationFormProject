@@ -1,0 +1,292 @@
+﻿@model List<RegistrationFormProject.Models.UserDocument>
+
+@{
+    ViewData["Title"] = "Manage Documents";
+}
+
+<div class="document-page">
+
+    <div class="mb-4">
+
+        <h1 class="fw-bold">
+            📄 Document Center
+        </h1>
+
+        <p class="text-muted">
+            Upload and manage your documents
+        </p>
+
+    </div>
+
+    <div class="row g-4">
+
+        <!-- Upload Section -->
+        <div class="col-lg-4">
+
+            <div class="card document-upload-card">
+
+                <div class="document-card-header">
+
+                    <h3>
+                        Upload Document
+                    </h3>
+
+                </div>
+
+                <div class="card-body p-4">
+
+                    <div class="document-status-card @(Model.Any(x => x.DocumentType == "Aadhaar") ? "status-success" : "status-warning")">
+
+                        Aadhaar Card :
+                        @(Model.Any(x => x.DocumentType == "Aadhaar")
+                            ? "✅ Uploaded"
+                            : "❌ Pending")
+
+                    </div>
+
+                    <div class="document-status-card @(Model.Any(x => x.DocumentType == "PAN") ? "status-success" : "status-warning")">
+
+                        PAN Card :
+                        @(Model.Any(x => x.DocumentType == "PAN")
+                            ? "✅ Uploaded"
+                            : "❌ Pending")
+
+                    </div>
+
+                    <form asp-action="UploadDocument"
+                          method="post"
+                          enctype="multipart/form-data">
+
+                        <div class="mb-3">
+
+                            <label class="form-label fw-semibold">
+
+                                Document Type
+
+                            </label>
+
+                            <select name="documentType"
+                                    class="form-select">
+
+                                @if (!Model.Any(x => x.DocumentType == "Aadhaar"))
+                                {
+                                    <option value="Aadhaar">
+                                        Aadhaar Card
+                                    </option>
+                                }
+
+                                @if (!Model.Any(x => x.DocumentType == "PAN"))
+                                {
+                                    <option value="PAN">
+                                        PAN Card
+                                    </option>
+                                }
+
+                                <option value="Other">
+                                    Other Document
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                        <div class="upload-box mb-3">
+
+                            <i class="bi bi-cloud-arrow-up upload-icon"></i>
+
+                            <p class="mb-3">
+
+                                Select Document
+
+                            </p>
+
+                            <input type="file"
+                                   name="file"
+                                   class="form-control" />
+
+                        </div>
+
+                        <button type="submit"
+                                class="btn btn-primary btn-modern w-100">
+
+                            Upload Document
+
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Documents List -->
+        <div class="col-lg-8">
+
+            <div class="card document-list-card">
+
+                <div class="document-card-header">
+
+                    <h3>
+                        My Documents
+                    </h3>
+
+                </div>
+
+                <div class="card-body">
+
+                    @if (!Model.Any())
+                    {
+                        <div class="document-empty">
+
+                            <i class="bi bi-folder-x fs-1"></i>
+
+                            <h5 class="mt-3">
+
+                                No Documents Uploaded
+
+                            </h5>
+
+                        </div>
+                    }
+                    else
+                    {
+                        @foreach (var doc in Model)
+                        {
+                            <div class="document-item">
+
+                                <div>
+
+                                    <span class="document-type-badge">
+
+                                        @doc.DocumentType
+
+                                    </span>
+
+                                    <div class="document-name mt-2">
+
+                                        @doc.FileName
+
+                                    </div>
+
+                                    <div class="document-date">
+
+                                        @doc.UploadedDate.ToLocalTime().ToString("dd MMM yyyy")
+
+                                    </div>
+
+                                </div>
+
+                                <div class="d-flex gap-2">
+
+                                    <a asp-action="ViewDocument"
+                                       asp-route-id="@doc.DocumentId"
+                                       class="btn btn-outline-primary btn-sm btn-modern">
+
+                                        <i class="bi bi-eye"></i>
+                                        View
+
+                                    </a>
+
+                                    @if (!doc.IsVerified)
+                                    {
+                                        <a href="javascript:void(0)"
+                                           class="btn btn-outline-danger btn-sm delete-btn"
+                                           data-id="@doc.DocumentId">
+
+                                            Delete
+
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success">
+
+                                            Verified
+
+                                        </span>
+                                    }
+
+                                </div>
+
+                            </div>
+                        }
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts
+{
+    @if (TempData["Success"] != null)
+    {
+        <script>
+            Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: '@TempData["Success"]',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        </script>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: '@TempData["Error"]'
+            });
+        </script>
+    }
+
+    <script>
+
+        document.querySelectorAll(".delete-btn")
+            .forEach(button => {
+
+                button.addEventListener("click", function () {
+
+                    let id = this.dataset.id;
+
+                    Swal.fire({
+
+                        title: 'Delete Document?',
+                        text: 'This action cannot be undone.',
+
+                        icon: 'warning',
+
+                        showCancelButton: true,
+
+                        confirmButtonColor: '#dc3545',
+                        cancelButtonColor: '#6c757d',
+
+                        confirmButtonText: 'Yes, Delete',
+                        cancelButtonText: 'Cancel'
+
+                    }).then((result) => {
+
+                        if (result.isConfirmed) {
+
+                            window.location.href =
+                                '/Document/Delete/' + id;
+                        }
+
+                    });
+
+                });
+
+            });
+
+    </script>
+}

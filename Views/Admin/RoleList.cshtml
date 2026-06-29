@@ -1,0 +1,101 @@
+﻿@model List<RegistrationFormProject.Models.RoleMaster>
+
+<div class="container py-5">
+
+    <div class="card shadow-lg border-0 p-4">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+
+            <div>
+                <h2 class="fw-bold mb-1">
+                    Role Management
+                </h2>
+
+                <p class="text-muted mb-0">
+                    Total Roles: @Model.Count
+                </p>
+            </div>
+
+            <input type="text"
+                   class="form-control w-25"
+                   placeholder="Search User..." />
+            <a asp-controller="Admin"
+               asp-action="AddRole"
+               class="btn add-role-btn btn-outline-primary btn-sm me-2 ">
+
+                + Add Role
+
+            </a>
+        </div>
+
+        <div class="table-responsive">
+
+            <table class="table align-middle table-hover">
+
+                <thead class="table-dark">
+
+                    <tr>
+
+                        <th>Role Id</th>
+
+                        <th>Role Name</th>
+
+                        <th class="text-center">Actions</th>
+
+                        
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    @foreach (var role in Model)
+                    {
+                        <tr>
+
+                            <td class="fw-semibold">
+                                @role.RoleId
+                            </td>
+
+                            <td>
+                                @role.RoleName
+                            </td>
+
+                           
+
+                            <td class="text-center">
+
+                                <a asp-controller="Admin"
+                                   asp-action="EditRole"
+                                   asp-route-RoleId="@role.RoleId"
+                                   class="btn btn-outline-primary btn-sm me-2">
+
+                                    Edit
+
+                                </a>
+
+                                <a asp-controller="Admin"
+                                   asp-action="DeleteRole"
+                                   asp-route-RoleId="@role.RoleId"
+                                   class="btn btn-outline-danger btn-sm"
+                                   onclick="return confirm('Delete this user?')">
+
+                                    Delete
+
+                                </a>
+
+                            </td>
+
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>

@@ -1,0 +1,122 @@
+﻿@{
+    ViewData["Title"] = "RegistrationFormProject";
+}
+
+<section class="landing-hero">
+    <div class="mouse-glow"></div>
+    <div class="hero-overlay"></div>
+
+    <div class="hero-wrapper">
+
+        <div class="hero-content">
+
+            <span class="hero-badge">
+                🚀 Modern User Management Platform
+            </span>
+
+            <h1>
+                Manage Users & Roles
+                <br />
+                With Confidence
+            </h1>
+
+            <p>
+                Secure authentication, role management,
+                and streamlined administration for modern organizations.
+            </p>
+
+            <div class="hero-buttons">
+
+                <a asp-controller="Register"
+                   asp-action="Index"
+                   class="hero-btn primary-btn">
+
+                    Create Account
+
+                </a>
+
+                <a asp-controller="Login"
+                   asp-action="Index"
+                   class="hero-btn secondary-btn">
+
+                    Sign In
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<section class="features-section">
+
+    <div class="container">
+
+        <div class="row g-4">
+
+            <div class="col-lg-4">
+
+                <div class="feature-card">
+
+                    <h2>🔐</h2>
+
+                    <h4>Secure Authentication</h4>
+
+                    <p>
+                        BCrypt protected passwords and secure login.
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div class="col-lg-4">
+
+                <div class="feature-card">
+
+                    <h2>👥</h2>
+
+                    <h4>User Management</h4>
+
+                    <p>
+                        Easily manage users and accounts.
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div class="col-lg-4">
+
+                <div class="feature-card">
+
+                    <h2>🛡️</h2>
+
+                    <h4>Role Based Access</h4>
+
+                    <p>
+                        Control permissions through roles.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+<script>
+    document.addEventListener('mousemove', (e) => {
+
+        const glow = document.querySelector('.mouse-glow');
+
+        glow.style.left = e.clientX + 'px';
+        glow.style.top = e.clientY + 'px';
+
+    });
+</script>

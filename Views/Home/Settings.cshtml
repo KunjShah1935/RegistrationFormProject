@@ -1,0 +1,134 @@
+@model RegistrationFormProject.Models.UserMaster
+@{
+    ViewData["Title"] = "Account Settings";
+}
+
+<div class="container py-5">
+    <div class="card shadow border-0 p-4 p-md-5 mx-auto" style="max-width: 800px; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(20px); border-radius: 24px;">
+        <div class="text-center mb-5">
+            <div class="login-icon mb-4">
+                ⚙️
+            </div>
+            <h1 class="fw-bold mb-2 text-dark">Account Settings</h1>
+            <p class="text-muted">Manage your profile details and account status</p>
+        </div>
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger mb-4 border-0 shadow-sm d-flex align-items-center gap-2" style="border-radius: 12px;">
+                <i class="bi bi-exclamation-octagon-fill fs-5"></i>
+                <div>@TempData["Error"]</div>
+            </div>
+        }
+
+        <form asp-controller="Home" asp-action="Settings" method="post" class="mb-5">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="UserId" />
+
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <label class="form-label text-secondary small fw-bold mb-2">Full Name</label>
+                    <input type="text" asp-for="FullName" class="form-control" placeholder="Enter Full Name" required />
+                    <span asp-validation-for="FullName" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label text-secondary small fw-bold mb-2">Username (Read-Only)</label>
+                    <input type="text" asp-for="UserName" class="form-control bg-light" readonly />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label text-secondary small fw-bold mb-2">Email ID</label>
+                    <input type="email" asp-for="EmailID" class="form-control" placeholder="Enter Email" required />
+                    <span asp-validation-for="EmailID" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label text-secondary small fw-bold mb-2">Mobile Number</label>
+                    <input type="text" asp-for="MobileNo" class="form-control" placeholder="Enter 10-digit Mobile Number" required />
+                    <span asp-validation-for="MobileNo" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label text-secondary small fw-bold mb-2">Date of Birth</label>
+                    <input type="date" asp-for="DOB" class="form-control" required />
+                    <span asp-validation-for="DOB" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label text-secondary small fw-bold mb-2">Gender</label>
+                    <div class="d-flex gap-3 pt-2">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" asp-for="Gender" value="Male" id="genderMale" required />
+                            <label class="form-check-label text-dark" for="genderMale">Male</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" asp-for="Gender" value="Female" id="genderFemale" required />
+                            <label class="form-check-label text-dark" for="genderFemale">Female</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" asp-for="Gender" value="Other" id="genderOther" required />
+                            <label class="form-check-label text-dark" for="genderOther">Other</label>
+                        </div>
+                    </div>
+                    <span asp-validation-for="Gender" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <div class="text-end mt-4">
+                <button type="submit" class="btn btn-primary px-5 btn-register text-white">
+                    <i class="bi bi-save-fill me-2"></i>Update Profile
+                </button>
+            </div>
+        </form>
+
+        <hr class="my-5" />
+
+        <div class="deactivate-section p-4 border border-danger-subtle rounded-4" style="background: rgba(220, 53, 69, 0.02);">
+            <div class="d-flex align-items-start gap-3">
+                <i class="bi bi-exclamation-triangle-fill text-danger fs-2 mt-1"></i>
+                <div class="flex-grow-1">
+                    <h5 class="fw-bold text-danger mb-1">Danger Zone</h5>
+                    <p class="text-muted small mb-3">Once you deactivate your account, you will be immediately signed out and will not be able to log back in. Your documents and details will remain securely stored but inaccessible to you.</p>
+                    
+                    @if (Model.IsSuperAdmin)
+                    {
+                        <button class="btn btn-danger disabled px-4 rounded-pill" type="button">
+                            <i class="bi bi-shield-slash-fill me-2"></i>Super Admin Cannot Deactivate
+                        </button>
+                    }
+                    else
+                    {
+                        <form asp-controller="Home" asp-action="DeactivateOwnAccount" method="post" id="deactivateForm">
+                            @Html.AntiForgeryToken()
+                            <button type="button" onclick="confirmSelfDeactivation()" class="btn btn-danger px-4 rounded-pill">
+                                <i class="bi bi-person-x-fill me-2"></i>Deactivate My Account
+                            </button>
+                        </form>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmSelfDeactivation() {
+            Swal.fire({
+                title: 'Deactivate Account?',
+                text: 'Are you sure you want to deactivate your own account? You will be signed out instantly and lose access until an administrator reactivates you.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, Deactivate My Account',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('deactivateForm').submit();
+                }
+            });
+        }
+    </script>
+}

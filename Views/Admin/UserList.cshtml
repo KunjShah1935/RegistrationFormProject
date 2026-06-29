@@ -1,0 +1,202 @@
+@model List<UserListVM>
+@if (TempData["Error"] != null)
+{
+    <script>
+
+        Swal.fire({
+            icon: 'error',
+            title: 'Operation Not Allowed',
+            text: '@TempData["Error"]',
+            confirmButtonColor: '#dc3545'
+        });
+
+    </script>
+}
+<div class="w-100 py-4 px-4">
+
+    <div class="card shadow-lg border-0 p-4  " style="width: 1250px;">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+
+            <div>
+                <h2 class="fw-bold mb-1">
+                    User Management
+                </h2>
+
+                <p class="text-muted mb-0">
+                    Total Users: @Model.Count
+                </p>
+            </div>
+
+            <input type="text"
+                   class="form-control" style="width: 250px;"
+                   placeholder="Search User..." />
+            <a asp-controller="Admin"
+               asp-action="AddUser"
+               class="btn add-role-btn btn-outline-primary btn-sm me-2 ">
+
+                + Add User
+
+            </a>
+        </div>
+
+        <div class="table-responsive">
+
+            <table class="table align-middle table-hover table-lg">
+
+                <thead class="table-dark">
+
+                    <tr>
+
+                        <th class="text-nowrap">Full Name</th>
+
+                        <th class="text-nowrap">User Name</th>
+
+                        <th>Email</th>
+
+                        <th>Mobile</th>
+
+                        <th>DOB</th>
+
+                        <th>Role</th>
+
+                        <th>Created</th>
+
+                        <th>Status</th>
+
+                        <th class="text-center">Actions</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    @foreach (var user in Model)
+                    {
+                        <tr>
+
+                            <td class="fw-semibold text-nowrap">
+                                @user.FullName
+                            </td>
+
+                            <td>
+                                @user.UserName
+                            </td>
+
+                            <td>
+                                @user.EmailID
+                            </td>
+
+                            <td>
+                                @user.MobileNo
+                            </td>
+
+                            <td class="fw-semibold text-nowrap">
+                                @user.DOB.ToString("dd-MM-yyyy")
+                            </td>
+
+                            <td>
+
+                                <span class="badge @(user.RoleName == "Admin"
+                                                              ? "bg-danger"
+                                                              : "bg-primary")">
+
+                                    @user.RoleName
+
+                                </span>
+
+                            </td>
+
+                            <td>
+                                @user.CreatedDate.ToString("dd-MM-yyyy")
+                            </td>
+
+                            <td>
+                                @if (user.IsActive)
+                                {
+                                    <span class="badge bg-success">Active</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Inactive</span>
+                                }
+                            </td>
+
+                            <td class="text-center text-nowrap">
+
+                                <a asp-controller="Admin"
+                                   asp-action="Edit"
+                                   asp-route-id="@user.UserId"
+                                   class="btn btn-outline-primary btn-sm me-2">
+
+                                    Edit
+
+                                </a>
+
+                                @if (user.IsSuperAdmin)
+                                {
+                                    <span class="badge bg-dark text-white px-2 py-1">Super Admin</span>
+                                }
+                                else
+                                {
+                                    @if (user.IsActive)
+                                    {
+                                        <a href="javascript:void(0)"
+                                           class="btn btn-outline-danger btn-sm"
+                                           onclick="confirmToggle(@user.UserId, '@user.UserName', true)">
+                                            Deactivate
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <a href="javascript:void(0)"
+                                           class="btn btn-outline-success btn-sm"
+                                           onclick="confirmToggle(@user.UserId, '@user.UserName', false)">
+                                            Activate
+                                        </a>
+                                    }
+                                }
+
+                            </td>
+
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+<script>
+
+    function confirmToggle(id, username, isDeactivating)
+    {
+        const titleText = isDeactivating ? 'Deactivate Account?' : 'Activate Account?';
+        const buttonText = isDeactivating ? 'Yes, Deactivate' : 'Yes, Activate';
+        const confirmColor = isDeactivating ? '#dc3545' : '#198754';
+        const bodyText = isDeactivating 
+            ? `Are you sure you want to deactivate ${username}? They will no longer be able to log in.`
+            : `Are you sure you want to activate ${username}? They will be able to log in again.`;
+
+        Swal.fire({
+            title: titleText,
+            text: bodyText,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: confirmColor,
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: buttonText
+        }).then((result) => {
+            if(result.isConfirmed)
+            {
+                window.location = '/Admin/Delete/' + id;
+            }
+        });
+    }
+
+</script>
