@@ -171,6 +171,32 @@
         }
     }
 
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', function (e) {
+                const inputs = form.querySelectorAll('input[type="text"]');
+                let hasXss = false;
+                inputs.forEach(function (input) {
+                    const value = input.value;
+                    if (value && /[<>]/.test(value)) {
+                        hasXss = true;
+                        const labelText = input.placeholder || input.name || "input";
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Potential Security Threat',
+                            text: `HTML/Script characters (< or >) are not allowed in the "${labelText}" field.`,
+                            confirmButtonColor: '#dc3545'
+                        });
+                    }
+                });
+                if (hasXss) {
+                    e.preventDefault();
+                }
+            });
+        }
+    });
+
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

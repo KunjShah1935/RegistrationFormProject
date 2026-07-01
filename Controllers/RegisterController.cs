@@ -85,6 +85,20 @@ namespace RegistrationFormProject.Controllers
 
             if (ModelState.IsValid)
             {
+                var password = user.Password;
+                bool hasMinLength = password.Length >= 8;
+                bool hasUpper = password.Any(char.IsUpper);
+                bool hasLower = password.Any(char.IsLower);
+                bool hasDigit = password.Any(char.IsDigit);
+                bool hasSpecial = password.Any(ch => !char.IsLetterOrDigit(ch));
+
+                if (!hasMinLength || !hasUpper || !hasLower || !hasDigit || !hasSpecial)
+                {
+                    ModelState.AddModelError("Password", "Password does not meet complexity requirements. It must be at least 8 characters long and contain uppercase, lowercase, numerical, and special characters.");
+                    ViewBag.Message = "Validation Failed";
+                    return View(user);
+                }
+
                 user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
                 
                 // STEP 3: Save user details. Admin IsApproved = false, User IsApproved = true. IsProfileVerified = false.

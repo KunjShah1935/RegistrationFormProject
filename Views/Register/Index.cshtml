@@ -77,8 +77,25 @@
 
                         <input asp-for="Password"
                                type="password"
-                               class="form-control" />
+                               class="form-control"
+                               id="Password" />
 
+                    </div>
+                    
+                    <div class="password-strength-container mt-2">
+                        <div class="progress" style="height: 6px; background-color: rgba(255,255,255,0.15);">
+                            <div id="strengthBar" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-1">
+                            <small id="strengthText" class="text-muted fw-semibold">Strength: Not Set</small>
+                        </div>
+                        <ul class="list-unstyled mt-2 pl-0" style="margin-left: 0; padding-left: 0;">
+                            <li id="req-length" class="text-danger small mb-1"><i class="bi bi-x-circle-fill me-1"></i> Minimum 8 characters</li>
+                            <li id="req-upper" class="text-danger small mb-1"><i class="bi bi-x-circle-fill me-1"></i> At least 1 uppercase letter</li>
+                            <li id="req-lower" class="text-danger small mb-1"><i class="bi bi-x-circle-fill me-1"></i> At least 1 lowercase letter</li>
+                            <li id="req-number" class="text-danger small mb-1"><i class="bi bi-x-circle-fill me-1"></i> At least 1 number</li>
+                            <li id="req-special" class="text-danger small mb-1"><i class="bi bi-x-circle-fill me-1"></i> At least 1 special character</li>
+                        </ul>
                     </div>
 
                 </div>
@@ -345,6 +362,131 @@ function refreshCaptcha() {
                 $.get("/Register/CheckMobile", { mobile: $(this).val() }, function (data) {
                     $("#mobileError").text(data ? "" : "Mobile already exists");
                 });
+            });
+
+            // Password strength meter logic
+            const passwordInput = document.getElementById('Password');
+            const strengthBar = document.getElementById('strengthBar');
+            const strengthText = document.getElementById('strengthText');
+
+            const reqLength = document.getElementById('req-length');
+            const reqUpper = document.getElementById('req-upper');
+            const reqLower = document.getElementById('req-lower');
+            const reqNumber = document.getElementById('req-number');
+            const reqSpecial = document.getElementById('req-special');
+
+            function updateReq(element, isValid) {
+                if (element) {
+                    const icon = element.querySelector('i');
+                    if (isValid) {
+                        if (icon) icon.className = "bi bi-check-circle-fill text-success me-1";
+                        element.className = "text-success small mb-1";
+                    } else {
+                        if (icon) icon.className = "bi bi-x-circle-fill text-danger me-1";
+                        element.className = "text-danger small mb-1";
+                    }
+                }
+            }
+
+            let isPasswordStrong = false;
+
+            if (passwordInput) {
+                passwordInput.addEventListener('input', function() {
+                    const val = passwordInput.value;
+                    
+                    const checks = {
+                        length: val.length >= 8,
+                        upper: /[A-Z]/.test(val),
+                        lower: /[a-z]/.test(val),
+                        number: /[0-9]/.test(val),
+                        special: /[^A-Za-z0-9]/.test(val)
+                    };
+                    
+                    updateReq(reqLength, checks.length);
+                    updateReq(reqUpper, checks.upper);
+                    updateReq(reqLower, checks.lower);
+                    updateReq(reqNumber, checks.number);
+                    updateReq(reqSpecial, checks.special);
+                    
+                    let score = 0;
+                    if (checks.length) score++;
+                    if (checks.upper) score++;
+                    if (checks.lower) score++;
+                    if (checks.number) score++;
+                    if (checks.special) score++;
+                    
+                    let strength = "Not Set";
+                    let barClass = "bg-secondary";
+                    let barWidth = "0%";
+                    isPasswordStrong = false;
+                    
+                    if (val.length > 0) {
+                        if (score <= 1) {
+                            strength = "Weak";
+                            barClass = "bg-danger";
+                            barWidth = "25%";
+                        } else if (score <= 3) {
+                            strength = "Ok";
+                            barClass = "bg-warning";
+                            barWidth = "50%";
+                        } else if (score === 4) {
+                            strength = "Good";
+                            barClass = "bg-info";
+                            barWidth = "75%";
+                        } else if (score === 5) {
+                            strength = "Strong";
+                            barClass = "bg-success";
+                            barWidth = "100%";
+                            isPasswordStrong = true;
+                        }
+                    }
+                    
+                    if (strengthText) strengthText.textContent = "Strength: " + strength;
+                    if (strengthBar) {
+                        strengthBar.className = "progress-bar " + barClass;
+                        strengthBar.style.width = barWidth;
+                    }
+                });
+            }
+
+            // Client-side XSS and password validation checks on form submission
+            $('form').on('submit', function (e) {
+                // 1. Password Strength enforcement
+                if (passwordInput && passwordInput.value.length > 0 && !isPasswordStrong) {
+                    e.preventDefault();
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Weak Password',
+                        text: 'Please make sure your password satisfies all security requirements (Strong status) before submitting.',
+                        confirmButtonColor: '#2563eb'
+                    });
+                    return false;
+                }
+
+                // 2. Client-side XSS prevention
+                let hasXss = false;
+                // Exclude password and file uploads from generic character filtering
+                const inputs = $(this).find('input[type="text"], input[type="email"], select, textarea');
+                
+                inputs.each(function () {
+                    const value = $(this).val();
+                    if (value && /[<>]/.test(value)) {
+                        hasXss = true;
+                        const fieldLabel = $(this).closest('.col-md-6, .col-12').find('label').text().trim() || $(this).attr('name');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Potential Security Threat',
+                            text: `HTML/Script characters (< or >) are not allowed in the "${fieldLabel}" field.`,
+                            confirmButtonColor: '#dc3545'
+                        });
+                        return false; // Break jquery loop
+                    }
+                });
+
+                if (hasXss) {
+                    e.preventDefault();
+                    return false;
+                }
             });
         });
     </script>
