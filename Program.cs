@@ -7,6 +7,7 @@ using RegistrationFormProject.Repositories;
 using RegistrationFormProject.Repositories.Interfaces;
 using RegistrationFormProject.Services;
 using RegistrationFormProject.Models;
+using RegistrationFormProject.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -91,6 +92,8 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+app.UseMiddleware<RequestPerformanceMiddleware>();
+app.UseMiddleware<SecurityHeadersMiddleware>();
 
 app.UseHttpsRedirection();
 
