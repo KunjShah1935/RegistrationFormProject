@@ -67,23 +67,23 @@ builder.Services.Configure<TwilioSettings>(
     builder.Configuration.GetSection("TwilioSettings"));
 var app = builder.Build();
 
-// using (var scope = app.Services.CreateScope())
-// {
-//     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-//     // Set all existing users to Active (since column default was false in DB)
-//     var inactiveUsers = context.UserMasters.Where(u => !u.IsActive).ToList();
-//     foreach (var u in inactiveUsers)
-//     {
-//         u.IsActive = true;
-//     }
-//     // Set first admin as SuperAdmin
-//     var firstAdmin = context.UserMasters.FirstOrDefault(u => u.RoleId == 1);
-//     if (firstAdmin != null)
-//     {
-//         firstAdmin.IsSuperAdmin = true;
-//     }
-//     context.SaveChanges();
-// }
+//using (var scope = app.Services.CreateScope())
+//{
+//    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+//    // Set all existing users to Active (since column default was false in DB)
+//    var inactiveUsers = context.UserMasters.Where(u => !u.IsActive).ToList();
+//    foreach (var u in inactiveUsers)
+//    {
+//        u.IsActive = true;
+//    }
+//    // Set first admin as SuperAdmin
+//    var firstAdmin = context.UserMasters.FirstOrDefault(u => u.RoleId == 1);
+//    if (firstAdmin != null)
+//    {
+//        firstAdmin.IsSuperAdmin = true;
+//    }
+//    context.SaveChanges();
+//}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
