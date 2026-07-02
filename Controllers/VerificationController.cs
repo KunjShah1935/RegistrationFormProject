@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using RegistrationFormProject.Data;
 using RegistrationFormProject.Models;
 using RegistrationFormProject.Services;
+using RegistrationFormProject.Services.Interface;
 using System.Security.Claims;
 
 namespace RegistrationFormProject.Controllers
@@ -12,11 +13,13 @@ namespace RegistrationFormProject.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IActivityLogger _activityLogger;
+        private readonly ICloudinaryService _cloudinaryService;
 
-        public VerificationController(ApplicationDbContext context, IActivityLogger activityLogger)
+        public VerificationController(ApplicationDbContext context, IActivityLogger activityLogger, ICloudinaryService cloudinaryService)
         {
             _context = context;
             _activityLogger = activityLogger;
+            _cloudinaryService = cloudinaryService;
         }
 
         // GET: Verification/Status
@@ -73,7 +76,13 @@ namespace RegistrationFormProject.Controllers
 
             try
             {
-                // Delete old file
+                // Delete old file from Cloudinary if public ID is present
+                if (!string.IsNullOrEmpty(document.CloudinaryPublicId))
+                {
+                    await _cloudinaryService.DeletePdfAsync(document.CloudinaryPublicId);
+                }
+
+                // Delete old file from local storage if it exists (legacy fallback)
                 string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
                 if (!string.IsNullOrEmpty(document.FilePath))
                 {
@@ -84,23 +93,14 @@ namespace RegistrationFormProject.Controllers
                     }
                 }
 
-                // Save new file
-                string uniqueFileName = Guid.NewGuid().ToString() + ".pdf";
-                string newFilePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                if (!Directory.Exists(uploadsFolder))
-                {
-                    Directory.CreateDirectory(uploadsFolder);
-                }
-
-                using (var fileStream = new FileStream(newFilePath, FileMode.Create))
-                {
-                    await file.CopyToAsync(fileStream);
-                }
+                // Upload new file to Cloudinary
+                var uploadResult = await _cloudinaryService.UploadPdfAsync(file);
 
                 // Update database record
                 document.FileName = file.FileName;
-                document.FilePath = uniqueFileName;
+                document.FilePath = file.FileName;
+                document.CloudinaryUrl = uploadResult.SecureUrl;
+                document.CloudinaryPublicId = uploadResult.PublicId;
                 document.UploadedDate = DateTime.Now;
                 document.IsVerified = false;
                 document.NeedsReupload = false;

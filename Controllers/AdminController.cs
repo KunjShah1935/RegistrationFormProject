@@ -392,17 +392,31 @@ namespace RegistrationFormProject.Controllers
                 return NotFound();
             }
 
-            ViewBag.FilePath = "/uploads/" + doc.FilePath;
+            ViewBag.FilePath = !string.IsNullOrEmpty(doc.CloudinaryUrl)
+                ? doc.CloudinaryUrl
+                : ("/uploads/" + doc.FilePath);
             ViewBag.FileName = doc.FileName;
             return View(doc);
         }
 
-        public IActionResult DownloadDocument(int id)
+        public async Task<IActionResult> DownloadDocument(int id)
         {
-            var doc = _context.UserDocuments.FirstOrDefault(x => x.DocumentId == id);
+            var doc = await _context.UserDocuments.FirstOrDefaultAsync(x => x.DocumentId == id);
             if (doc == null)
             {
                 return NotFound();
+            }
+
+            if (!string.IsNullOrEmpty(doc.CloudinaryUrl))
+            {
+                using (var httpClient = new System.Net.Http.HttpClient())
+                {
+                    var stream = await httpClient.GetStreamAsync(doc.CloudinaryUrl);
+                    var memoryStream = new System.IO.MemoryStream();
+                    await stream.CopyToAsync(memoryStream);
+                    memoryStream.Position = 0;
+                    return File(memoryStream, "application/pdf", doc.FileName);
+                }
             }
 
             string path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", doc.FilePath);

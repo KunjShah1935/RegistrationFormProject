@@ -16,6 +16,10 @@ namespace RegistrationFormProject.Models
 
         public string FilePath { get; set; }
 
+        public string? CloudinaryUrl { get; set; }
+
+        public string? CloudinaryPublicId { get; set; }
+
         public DateTime UploadedDate { get; set; }
         [ForeignKey("UserId")]
         public UserMaster UserMaster { get; set; }

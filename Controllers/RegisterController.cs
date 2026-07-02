@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System;
 using RegistrationFormProject.Services;
+using RegistrationFormProject.Services.Interface;
 
 namespace RegistrationFormProject.Controllers
 {
@@ -13,11 +14,13 @@ namespace RegistrationFormProject.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IActivityLogger _activityLogger;
+        private readonly ICloudinaryService _cloudinaryService;
 
-        public RegisterController(ApplicationDbContext context, IActivityLogger activityLogger)
+        public RegisterController(ApplicationDbContext context, IActivityLogger activityLogger, ICloudinaryService cloudinaryService)
         {
             _context = context;
             _activityLogger = activityLogger;
+            _cloudinaryService = cloudinaryService;
         }
 
         //GET
@@ -117,23 +120,23 @@ namespace RegistrationFormProject.Controllers
                 _context.SaveChanges(); // Persist user to get UserId
 
                 // Save files
-                SaveUserDocument(user.UserId, AadhaarFile, "Aadhaar");
-                SaveUserDocument(user.UserId, PanFile, "PAN");
+                await SaveUserDocumentAsync(user.UserId, AadhaarFile, "Aadhaar");
+                await SaveUserDocumentAsync(user.UserId, PanFile, "PAN");
 
                 if (PassportFile != null && PassportFile.Length > 0)
-                    SaveUserDocument(user.UserId, PassportFile, "Passport");
+                    await SaveUserDocumentAsync(user.UserId, PassportFile, "Passport");
 
                 if (DrivingLicenseFile != null && DrivingLicenseFile.Length > 0)
-                    SaveUserDocument(user.UserId, DrivingLicenseFile, "Driving License");
+                    await SaveUserDocumentAsync(user.UserId, DrivingLicenseFile, "Driving License");
 
                 if (VoterIdFile != null && VoterIdFile.Length > 0)
-                    SaveUserDocument(user.UserId, VoterIdFile, "Voter ID");
+                    await SaveUserDocumentAsync(user.UserId, VoterIdFile, "Voter ID");
 
                 if (RationCardFile != null && RationCardFile.Length > 0)
-                    SaveUserDocument(user.UserId, RationCardFile, "Ration Card");
+                    await SaveUserDocumentAsync(user.UserId, RationCardFile, "Ration Card");
 
                 if (OthersFile != null && OthersFile.Length > 0)
-                    SaveUserDocument(user.UserId, OthersFile, "Others");
+                    await SaveUserDocumentAsync(user.UserId, OthersFile, "Others");
 
                 _context.SaveChanges();
 
@@ -225,28 +228,18 @@ namespace RegistrationFormProject.Controllers
             return null;
         }
 
-        private void SaveUserDocument(int userId, IFormFile file, string documentType)
+        private async Task SaveUserDocumentAsync(int userId, IFormFile file, string documentType)
         {
-            string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
-            if (!Directory.Exists(uploadsFolder))
-            {
-                Directory.CreateDirectory(uploadsFolder);
-            }
-
-            string uniqueFileName = Guid.NewGuid().ToString() + ".pdf";
-            string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-            using (var fileStream = new FileStream(filePath, FileMode.Create))
-            {
-                file.CopyTo(fileStream);
-            }
+            var uploadResult = await _cloudinaryService.UploadPdfAsync(file);
 
             var document = new UserDocument
             {
                 UserId = userId,
                 DocumentType = documentType,
                 FileName = file.FileName,
-                FilePath = uniqueFileName,
+                FilePath = file.FileName,
+                CloudinaryUrl = uploadResult.SecureUrl,
+                CloudinaryPublicId = uploadResult.PublicId,
                 UploadedDate = DateTime.Now,
                 IsVerified = false,
                 NeedsReupload = false,

@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using RegistrationFormProject.Data;
 using RegistrationFormProject.Models;
 using RegistrationFormProject.Services;
+using RegistrationFormProject.Services.Interface;
+using Microsoft.EntityFrameworkCore;
 
 namespace RegistrationFormProject.Controllers
 {
@@ -9,11 +11,13 @@ namespace RegistrationFormProject.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IActivityLogger _activityLogger;
+        private readonly ICloudinaryService _cloudinaryService;
 
-        public DocumentController(ApplicationDbContext context, IActivityLogger activityLogger)
+        public DocumentController(ApplicationDbContext context, IActivityLogger activityLogger, ICloudinaryService cloudinaryService)
         {
             _context = context;
             _activityLogger = activityLogger;
+            _cloudinaryService = cloudinaryService;
         }
 
         public IActionResult Index()
@@ -75,7 +79,7 @@ namespace RegistrationFormProject.Controllers
                 }
             }
 
-            SaveDocument(file, userId.Value, documentType);
+            await SaveDocumentAsync(file, userId.Value, documentType);
 
             await _activityLogger.LogAsync("Uploaded document of type: " + documentType);
 
@@ -83,39 +87,12 @@ namespace RegistrationFormProject.Controllers
             return RedirectToAction("Index");
         }
 
-        private void SaveDocument(
+        private async Task SaveDocumentAsync(
             IFormFile file,
             int userId,
             string documentType)
         {
-            string uploadsFolder =
-                Path.Combine(
-                    Directory.GetCurrentDirectory(),
-                    "wwwroot",
-                    "uploads");
-
-            if (!Directory.Exists(uploadsFolder))
-            {
-                Directory.CreateDirectory(
-                    uploadsFolder);
-            }
-
-            string fileName =
-                Guid.NewGuid().ToString() +
-                Path.GetExtension(file.FileName);
-
-            string fullPath =
-                Path.Combine(
-                    uploadsFolder,
-                    fileName);
-
-            using (var stream =
-                   new FileStream(
-                       fullPath,
-                       FileMode.Create))
-            {
-                file.CopyTo(stream);
-            }
+            var uploadResult = await _cloudinaryService.UploadPdfAsync(file);
 
             UserDocument document =
                 new UserDocument
@@ -123,24 +100,38 @@ namespace RegistrationFormProject.Controllers
                     UserId = userId,
                     DocumentType = documentType,
                     FileName = file.FileName,
-                    FilePath = fileName,
+                    FilePath = file.FileName,
+                    CloudinaryUrl = uploadResult.SecureUrl,
+                    CloudinaryPublicId = uploadResult.PublicId,
                     UploadedDate = DateTime.Now
                 };
 
             _context.UserDocuments.Add(document);
 
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
-        public IActionResult ViewDocument(int id)
+        public async Task<IActionResult> ViewDocument(int id)
         {
             var doc =
-                _context.UserDocuments
-                .FirstOrDefault(x => x.DocumentId == id);
+                await _context.UserDocuments
+                .FirstOrDefaultAsync(x => x.DocumentId == id);
 
             if (doc == null)
             {
                 return NotFound();
+            }
+
+            if (!string.IsNullOrEmpty(doc.CloudinaryUrl))
+            {
+                using (var httpClient = new System.Net.Http.HttpClient())
+                {
+                    var stream = await httpClient.GetStreamAsync(doc.CloudinaryUrl);
+                    var memoryStream = new System.IO.MemoryStream();
+                    await stream.CopyToAsync(memoryStream);
+                    memoryStream.Position = 0;
+                    return File(memoryStream, "application/pdf");
+                }
             }
 
             string path =
@@ -148,6 +139,11 @@ namespace RegistrationFormProject.Controllers
                     Directory.GetCurrentDirectory(),
                     "wwwroot/uploads",
                     doc.FilePath);
+
+            if (!System.IO.File.Exists(path))
+            {
+                return NotFound();
+            }
 
             return PhysicalFile(
                 path,
@@ -157,11 +153,16 @@ namespace RegistrationFormProject.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             var doc =
-                _context.UserDocuments.Find(id);
+                await _context.UserDocuments.FindAsync(id);
 
             if (doc == null)
             {
                 return RedirectToAction("Index");
+            }
+
+            if (!string.IsNullOrEmpty(doc.CloudinaryPublicId))
+            {
+                await _cloudinaryService.DeletePdfAsync(doc.CloudinaryPublicId);
             }
 
             string path =
@@ -180,7 +181,7 @@ namespace RegistrationFormProject.Controllers
 
             _context.UserDocuments.Remove(doc);
 
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             await _activityLogger.LogAsync("Deleted document of type: " + documentType);
 
@@ -189,15 +190,27 @@ namespace RegistrationFormProject.Controllers
 
             return RedirectToAction("Index");
         }
-        public IActionResult DownloadDocument(int id)
+        public async Task<IActionResult> DownloadDocument(int id)
         {
             var doc =
-                _context.UserDocuments
-                .FirstOrDefault(x => x.DocumentId == id);
+                await _context.UserDocuments
+                .FirstOrDefaultAsync(x => x.DocumentId == id);
 
             if (doc == null)
             {
                 return NotFound();
+            }
+
+            if (!string.IsNullOrEmpty(doc.CloudinaryUrl))
+            {
+                using (var httpClient = new System.Net.Http.HttpClient())
+                {
+                    var stream = await httpClient.GetStreamAsync(doc.CloudinaryUrl);
+                    var memoryStream = new System.IO.MemoryStream();
+                    await stream.CopyToAsync(memoryStream);
+                    memoryStream.Position = 0;
+                    return File(memoryStream, "application/pdf", doc.FileName);
+                }
             }
 
             string path =
@@ -207,22 +220,29 @@ namespace RegistrationFormProject.Controllers
                     "uploads",
                     doc.FilePath);
 
+            if (!System.IO.File.Exists(path))
+            {
+                return NotFound();
+            }
+
             return PhysicalFile(
                 path,
                 "application/pdf",
                 doc.FileName);
         }
-        public IActionResult PreviewDocument(int id)
+        public async Task<IActionResult> PreviewDocument(int id)
         {
-            var doc = _context.UserDocuments
-                .FirstOrDefault(x => x.DocumentId == id);
+            var doc = await _context.UserDocuments
+                .FirstOrDefaultAsync(x => x.DocumentId == id);
 
             if (doc == null)
             {
                 return NotFound();
             }
 
-            ViewBag.FilePath = "/uploads/" + doc.FilePath;
+            ViewBag.FilePath = !string.IsNullOrEmpty(doc.CloudinaryUrl)
+                ? doc.CloudinaryUrl
+                : ("/uploads/" + doc.FilePath);
             ViewBag.FileName = doc.FileName;
 
             return View();

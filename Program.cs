@@ -6,6 +6,7 @@ using RegistrationFormProject.Filters;
 using RegistrationFormProject.Repositories;
 using RegistrationFormProject.Repositories.Interfaces;
 using RegistrationFormProject.Services;
+using RegistrationFormProject.Services.Interface;
 using RegistrationFormProject.Models;
 using RegistrationFormProject.Middlewares;
 
@@ -65,6 +66,9 @@ builder.Services.AddScoped<
     EmailService>();
 builder.Services.Configure<TwilioSettings>(
     builder.Configuration.GetSection("TwilioSettings"));
+builder.Services.Configure<CloudinarySettings>(
+    builder.Configuration.GetSection("CloudinarySettings"));
+builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 var app = builder.Build();
 
 //using (var scope = app.Services.CreateScope())
